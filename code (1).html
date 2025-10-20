@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAN WhatsApp</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --accent: #25d366;
+            --secondary-bg: #1e1e1e;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+        body.light {
+            --bg-color: #f0f0f0;
+            --text-color: #000000;
+            --secondary-bg: #ffffff;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: var(--secondary-bg);
+            border-right: 1px solid #333;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 15px;
+            background-color: var(--accent);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #2a2a2a;
+            padding: 10px 0;
+        }
+        .tab {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .tab.active {
+            background-color: var(--accent);
+            color: white;
+        }
+        .tab-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        .chat-list, .status-list, .call-list, .community-list, .settings-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .chat-item, .status-item, .call-item, .community-item {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .chat-item:hover, .status-item:hover, .call-item:hover, .community-item:hover {
+            background-color: #333;
+        }
+        .chat-item.active {
+            background-color: var(--accent);
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #555;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        .chat-name, .status-name, .call-name, .community-name {
+            font-weight: bold;
+        }
+        .chat-last-message, .status-text, .call-time, .community-desc {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 15px;
+            background-color: var(--accent);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-actions button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: var(--bg-color);
+        }
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.sent {
+            background-color: var(--accent);
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .message.received {
+            background-color: var(--secondary-bg);
+            align-self: flex-start;
+        }
+        .message-text {
+            margin-bottom: 5px;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #aaa;
+            align-self: flex-end;
+        }
+        .read-receipt {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .media-placeholder {
+            width: 200px;
+            height: 150px;
+            background-color: #555;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .input-bar {
+            display: flex;
+            padding: 10px;
+            background-color: var(--secondary-bg);
+            border-top: 1px solid #333;
+            align-items: center;
+        }
+        .input-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 20px;
+            outline: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .input-bar button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .emoji-picker {
+            position: absolute;
+            bottom: 60px;
+            background: var(--secondary-bg);
+            border: 1px solid #333;
+            padding: 10px;
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+        .emoji {
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .settings-list li {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .settings-list button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .mode-toggle {
+            cursor: pointer;
+            font-size: 18px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                display: none;
+            }
+            .sidebar.show {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            AMAN WhatsApp
+            <div class="mode-toggle" id="modeToggle">🌙</div>
+        </div>
+        <div class="tabs">
+            <div class="tab active" data-tab="chats">Chats</div>
+            <div class="tab" data-tab="status">Status</div>
+            <div class="tab" data-tab="calls">Calls</div>
+            <div class="tab" data-tab="communities">Communities</div>
+            <div class="tab" data-tab="settings">Settings</div>
+        </div>
+        <div class="tab-content" id="tab-content">
+            <!-- Chats -->
+            <ul class="chat-list" id="chats">
+                <li class="chat-item active" data-chat="1">
+                    <div class="avatar">J</div>
+                    <div>
+                        <div class="chat-name">AMAN </div>
+                        <div class="chat-last-message">Hey, how are you? 😊</div>
+                    </div>
+                </li>
+                <li class="chat-item" data-chat="2">
+                    <div class="avatar">F</div>
+                    <div>
+                        <div class="chat-name">Family Group</div>
+                        <div class="chat-last-message">Dinner at 8?</div>
+                    </div>
+                </li>
+            </ul>
+            <!-- Status -->
+            <ul class="status-list" id="status" style="display: none;">
+                <li class="status-item">
+                    <div class="avatar">M</div>
+                    <div>
+                        <div class="status-name">My Status</div>
+                        <div class="status-text">Available now</div>
+                    </div>
+                </li>
+            </ul>
+            <!-- Calls -->
+            <ul class="call-list" id="calls" style="display: none;">
+                <li class="call-item">
+                    <div class="avatar">J</div>
+                    <div>
+                        <div class="call-name">AMAN</div>
+                        <div class="call-time">Voice call - 5 min ago</div>
+                    </div>
+                    <button>📞</button>
+                </li>
+            </ul>
+            <!-- Communities -->
+            <ul class="community-list" id="communities" style="display: none;">
+                <li class="community-item">
+                    <div class="avatar">C</div>
+                    <div>
+                        <div class="community-name">Tech Community</div>
+                        <div class="community-desc">Discuss latest tech</div>
+                    </div>
+                </li>
+            </ul>
+            <!-- Settings -->
+            <ul class="settings-list" id="settings" style="display: none;">
+                <li>Profile: Edit name/photo</li>
+                <li>Privacy: End-to-end encrypted (simulated)</li>
+                <li>Notifications</li>
+                <li><button>Logout</button></li>
+            </ul>
+        </div>
+    </div>
+    <div class="main-chat">
+        <div class="chat-header">
+            <span id="chat-title">AMAN</span>
+            <div class="chat-actions">
+                <button>📞</button>
+                <button>📹</button>
+                <button>⋯</button>
+            </div>
+        </div>
+        <div class="messages" id="messages">
+            <div class="message received">
+                <div class="message-text">Hey, how are you? 😊</div>
+                <div class="message-time">10:30 AM</div>
+                <div class="read-receipt">Read</div>
+            </div>
+            <div class="message sent">
+                <div class="message-text">I'm good! Sent a pic:</div>
+                <div class="media-placeholder">📷 Image</div>
+                <div class="message-time">10:32 AM</div>
+                <div class="read-receipt">Delivered</div>
+            </div>
+        </div>
+        <div class="input-bar">
+            <button id="emojiBtn">😊</button>
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button id="attachBtn">📎</button>
+            <button id="sendButton">Send</button>
+            <div class="emoji-picker" id="emojiPicker">
+                😊 😂 ❤️ 👍 🔥 👏
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content > ul');
+        const chatItems = document.querySelectorAll('.chat-item');
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatTitle = document.getElementById('chat-title');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const attachBtn = document.getElementById('attachBtn');
+        const modeToggle = document.getElementById('modeToggle');
+        const body = document.body;
+
+        // Sample data
+        const chats = {
+            1: { name: 'AMAN', messages: [
+                { text: 'Hey, how are you? 😊', type: 'received', time: '10:30 AM', read: 'Read' },
+                { text: 'I\'m good! Sent a pic:', type: 'sent', time: '10:32 AM', read: 'Delivered', media: '📷 Image' }
+            ]},
+            2: { name: 'Family Group', messages: [
+                { text: 'Dinner at 8?', type: 'received', time: '8:00 PM', read: 'Read' }
+            ]}
+        };
+
+        let currentChat = 1;
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                tabContents.forEach(content => content.style.display = 'none');
+                document.getElementById(tab.dataset.tab).style.display = 'block';
+            });
+        });
+
+        // Chat switching
+        chatItems.forEach(item => {
+            item.addEventListener('click', () => {
+                chatItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentChat = item.dataset.chat;
+                chatTitle.textContent = chats[currentChat].name;
+                renderMessages();
+            });
+        });
+
+        // Render messages
+        function renderMessages() {
+            messagesContainer.innerHTML = '';
+            chats[currentChat].messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${msg.type}`;
+                msgDiv.innerHTML = `
+                    <div class="message-text">${msg.text}</div>
+                    ${msg.media ? `<div class="media-placeholder">${msg.media}</div>` : ''}
+                    <div class="message-time">${msg.time}</div>
+                    <div class="read-receipt">${msg.read}</div>
+                `;
+                messagesContainer.appendChild(msgDiv);
+            });
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send message
+        sendButton.addEventListener('click', () => {
+            const text = messageInput.value.trim();
+            if (text) {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                chats[currentChat].messages.push({ text, type: 'sent', time, read: 'Sent' });
+                messageInput.value = '';
+                renderMessages();
+            }
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendButton.click();
+        });
+
+        // Emoji picker
+        emojiBtn.addEventListener('click', () => {
+            emojiPicker.style.display = emojiPicker.style.display === 'grid' ? 'none' : 'grid';
+        });
+
+        document.querySelectorAll('.emoji').forEach(emoji => {
+            emoji.addEventListener('click', () => {
+                messageInput.value += emoji.textContent;
+                emojiPicker.style.display = 'none';
+            });
+        });
+
+        // Attach (simulated)
+        attachBtn.addEventListener('click', () => {
+            alert('File upload simulated - in real app, integrate with API.');
+        });
+
+        // Mode toggle
+        modeToggle.addEventListener('click', () => {
+            body.classList.toggle('light');
+            modeToggle.textContent = body.classList.contains('light') ? '☀️' : '🌙';
+        });
+
+        renderMessages();
+    </script>
+</body>
+</html>
